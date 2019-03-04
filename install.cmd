@@ -1,10 +1,10 @@
 @echo off
 
-REM 	Skript:				install.cmd
+REM 	Skript:       install.cmd
 REM 	Author:				WileC
-REM 	Web:				http://www.djwilec.de
+REM 	Web:				  http://www.djwilec.de
 REM		Infos:				getestet mit Windows 10;
-REM							automatisierte Installation zur einfachen (Erst)-Installation von Freetz auf AVM-FritzBoxen
+REM							    automatisierte Installation zur einfachen (Erst)-Installation von Freetz auf AVM-FritzBoxen
 REM		Unterstützte Boxen:	3490, 4040, 6820
 
 REM Verzeichnis anlegen
@@ -26,7 +26,6 @@ powershell -command {Unblock-File -Path .\FreetzTheBox\*.ps1}
 
 echo.
 echo.
-echo "Für weitere Infos bitte README.TXT lesen!"
 echo "Zur Deinstallation die UNINSTALL.CMD ausführen."
 echo.
 
