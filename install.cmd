@@ -5,7 +5,7 @@ REM     Author:                 WileC
 REM     DL-Source:              https://github.com/WileC/FreetzTheBox
 REM     Web:                    http://www.djwilec.de
 REM     Infos:                  getestet mit Windows 10; automatisierte Installation zur einfachen (Erst-)Installation von Freetz auf den
-                                FritzBoxen von AVM
+REM                             FritzBoxen von AVM
 REM     Unterstützte Boxen:     3490, 4040, 6820
 
 REM Verzeichnis anlegen
