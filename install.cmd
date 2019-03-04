@@ -16,10 +16,10 @@ curl --insecure --location --output FreetzTheBox/EVA-Discover.ps1 "https://githu
 curl --insecure --location --output FreetzTheBox/EVA-FTP-Client.ps1 "https://github.com/PeterPawn/YourFritz/raw/master/eva_tools/EVA-FTP-Client.ps1"
 
 REM Wrapper-Skript von WileC herunterladen
-curl --insecure --location --output FreetzTheBox/FreetzTheBox.ps1 "http://freetz.d-jay.de/FreetzTheBox/FreetzTheBox.ps1
+curl --insecure --location --output FreetzTheBox/FreetzTheBox.ps1 "https://github.com/WileC/FreetzTheBox/FreetzTheBox.ps1
 
 REM Uninstall-Skript von WileC herunterladen
-curl --insecure --location --output uninstall.cmd "http://freetz.d-jay.de/FreetzTheBox/uninstall.cmd"
+curl --insecure --location --output uninstall.cmd "https://github.com/WileC/FreetzTheBox/uninstall.cmd"
 
 REM PowerShell-Skripte erlauben
 powershell -command {Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser -Force}
