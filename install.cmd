@@ -19,7 +19,7 @@ REM Wrapper-Skript von WileC herunterladen
 curl --insecure --location --output FreetzTheBox/FreetzTheBox.ps1 "https://github.com/WileC/FreetzTheBox/raw/master/FreetzTheBox.ps1"
 
 REM Uninstall-Skript von WileC herunterladen
-curl --insecure --location --output uninstall.cmd "https://github.com/WileC/FreetzTheBox/uninstall.cmd"
+curl --insecure --location --output uninstall.cmd "https://github.com/WileC/FreetzTheBox/raw/master/uninstall.cmd"
 
 REM PowerShell-Skripte erlauben
 powershell -command {Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser -Force}
