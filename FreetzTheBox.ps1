@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
-    Wrapper-Skript für PeterPawns EVA-Tools PowerShell-Skripte
+    Wrapper-Skript fÃ¼r PeterPawns EVA-Tools PowerShell-Skripte
 
 .DESCRIPTION
-    PowerShell-Skript zum flashen von FRITZ!Boxen über den Bootloader
+    PowerShell-Skript zum flashen von FRITZ!Boxen Ã¼ber den Bootloader
     mittels der im freetz erstellten *.image.in-memory. oder kernel.image
-    Dieses Skript benötigt die EVA-Tools aus PeterPawns GitHup-Repository
+    Dieses Skript benÃ¶tigt die EVA-Tools aus PeterPawns GitHup-Repository
 
 .NOTES
     Filename: FreetzTheBox.ps1
@@ -35,12 +35,12 @@ Param([Parameter(Mandatory = $True, Position = 0, HelpMessage = 'Fritz!Box-Type 
       [Parameter(Mandatory = $True, Position = 1, HelpMessage = 'The imagefile to load in the bootloader')][string]$ImageFile
     )
 
-$NAND_Box = @(3390, 3490, 6820);
+$NAND_Box = @(3390, 3490, 6820, 6890);
 $NOR_Box = @(4040);
 $Box_IP = '169.254.172.1';
 $Flash_Type = '';
 
-# Ist der Fritz!Box-Typ übergeben worden?
+# Ist der Fritz!Box-Typ Ã¼bergeben worden?
 if (-not $BoxType)
     {
     Write-Error -Message "Fritz!Box-Typ nicht angegeben, ggf. Hilfe/Readme lesen!" -Category NotSpecified;
@@ -50,18 +50,18 @@ if (-not $BoxType)
 # ist die Variable BoxType in den Arrays zu finden?
 if (-not ($NAND_Box -match $BoxType) -and -not ($NOR_Box -match $BoxType))
     {
-    Write-Error -Message "Der angegebene Fritz!Box-Typ wird derzeit nicht unterstützt" -Category InvalidData;
+    Write-Error -Message "Der angegebene Fritz!Box-Typ wird derzeit nicht unterstÃ¼tzt" -Category InvalidData;
     exit 1;
     }
 
-# Ist die Image-Datei angegeben worden und gibt es sie tatsächlich?
+# Ist die Image-Datei angegeben worden und gibt es sie tatsÃ¤chlich?
 if (-not (Test-Path $ImageFile))
     {
     Write-Error -Message "Dateiname $ImageFile nicht gefunden!" -Category ObjectNotFound;
     Exit 1;
     }
 
-# Übergebene Image-Datei in einen absoluten Pfad umwandeln
+# Ãœbergebene Image-Datei in einen absoluten Pfad umwandeln
 $ImageFile = Resolve-Path $ImageFile;
 
 #########################################################
@@ -81,7 +81,7 @@ if (-not (.\EVA-Discover.ps1 -maxWait 60 $Box_IP -Debug -Verbose))
 #########################################################
 #
 # Skript-Aufruf von .\EVA-FTP-Client.ps1
-# für NAND-Boxen:
+# fÃ¼r NAND-Boxen:
 
 if ($NAND_Box -match $BoxType)
     {
@@ -92,7 +92,7 @@ if ($NAND_Box -match $BoxType)
         }
     }
 
-# für NOR-Boxen:
+# fÃ¼r NOR-Boxen:
 
 if ($NOR_Box -match $BoxType)
     {
