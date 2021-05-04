@@ -21,7 +21,7 @@
     Der Name der Fritz!Box
 
 .PARAMTER ImageFile
-    Die image-Datei, welche in den Bootloader der FRITZ!Box geschrieben werden soll. Vgl. hierzu "EXAMPLE"
+    Die Image-Datei, welche in den Bootloader der FRITZ!Box geschrieben werden soll. Vgl. hierzu "EXAMPLE"
 
 .LINK
     https://github.com/PeterPawn/YourFritz/tree/master/eva_tools
@@ -35,7 +35,7 @@ Param([Parameter(Mandatory = $True, Position = 0, HelpMessage = 'Fritz!Box-Type 
       [Parameter(Mandatory = $True, Position = 1, HelpMessage = 'The imagefile to load in the bootloader')][string]$ImageFile
     )
 
-$NAND_Box = @(3390, 3490, 6820, 6890);
+$NAND_Box = @(3390, 3490, 6820, 6890, 7590);
 $NOR_Box = @(4040);
 $Box_IP = '169.254.172.1';
 $Flash_Type = '';
