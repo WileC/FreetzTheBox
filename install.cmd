@@ -6,10 +6,11 @@ REM     DL-Source:              https://github.com/WileC/FreetzTheBox
 REM     Web:                    http://www.djwilec.de
 REM     Infos:                  getestet mit Windows 10; automatisierte Installation zur einfachen (Erst-)Installation von Freetz auf den
 REM                             FritzBoxen von AVM
-REM     Unterstützte Boxen:     3490, 4040, 6820, 6890, 7590
+REM     Unterstützte Boxen:     3390, 3490, 4020, 4040, 6820, 6890, 7590
 
-REM Verzeichnis anlegen
+REM Verzeichnisse anlegen
 mkdir FreetzTheBox
+mkdir FreetzTheBox\Images
 
 REM PowerShell-Skripte von PeterPawns GitHub herunterladen
 curl --insecure --location --output FreetzTheBox/EVA-Discover.ps1 "https://github.com/PeterPawn/YourFritz/raw/master/eva_tools/EVA-Discover.ps1"
@@ -24,7 +25,6 @@ curl --insecure --location --output uninstall.cmd "https://github.com/WileC/Free
 
 REM PowerShell-Skripte erlauben
 powershell -command {Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser -Force}
-powershell -command {Unblock-File -Path .\FreetzTheBox\*.ps1}
 
 echo.
 echo.

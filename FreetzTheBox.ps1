@@ -1,21 +1,18 @@
 <#
 .SYNOPSIS
-    Wrapper-Skript fÃ¼r PeterPawns EVA-Tools PowerShell-Skripte
+    Wrapper-Skript für PeterPawns EVA-Tools PowerShell-Skripte
 
 .DESCRIPTION
-    PowerShell-Skript zum flashen von FRITZ!Boxen Ã¼ber den Bootloader
-    mittels der im freetz erstellten *.image.in-memory. oder kernel.image
-    Dieses Skript benÃ¶tigt die EVA-Tools aus PeterPawns GitHup-Repository
+    PowerShell-Skript zum flashen von FRITZ!Boxen über den Bootloader
+    mittels der im freetz erstellten *.image-Datei. Liegt bereits ein in-memory-Image
+    vor, so muss der Paramter "-isbootable" verwendet werden.
+    Dieses Skript benötigt die EVA-Tools aus PeterPawns GitHup-Repository
 
 .NOTES
     Filename: FreetzTheBox.ps1
 
 .EXAMPLE
-    NAND-Boxen
-    .\FreetzTheBox.ps1 -BoxType 3490 -ImageFile .\example.image.in-memory
-
-    NOR-Boxen
-    .\FreetzTheBox.ps1 -BoxType 4040 -ImageFile .\kernel.image
+    .\FreetzTheBox.ps1 -BoxType 3490 -ImageFile .\example.image [-isbootable]
 
 .PARAMTER BoxType
     Der Name der Fritz!Box
@@ -24,85 +21,123 @@
     Die Image-Datei, welche in den Bootloader der FRITZ!Box geschrieben werden soll. Vgl. hierzu "EXAMPLE"
 
 .LINK
-    https://github.com/PeterPawn/YourFritz/tree/master/eva_tools
+    https://github.com/PeterPawn/YourFritz
 
 #>
 
 #####################################################################
+##
+## Parameter-Definitionen
 
-
-Param([Parameter(Mandatory = $True, Position = 0, HelpMessage = 'Fritz!Box-Type e.g. 3490')][int]$BoxType,
-      [Parameter(Mandatory = $True, Position = 1, HelpMessage = 'The imagefile to load in the bootloader')][string]$ImageFile
+Param([Parameter(Mandatory = $True, HelpMessage = 'Fritz!Box-Type e.g. 3490')][int]$BoxType,
+      [Parameter(Mandatory = $True, HelpMessage = 'The imagefile to load in the bootloader')][string]$ImageFile,
+      [Parameter(Mandatory = $False, HelpMessage = 'Is it an in-memory image?')][bool]$bootableImage=$false
     )
 
-$NAND_Box = @(3390, 3490, 6820, 6890, 7590);
-$NOR_Box = @(4040);
+
+## Variablen-Definitonen
+$SupportedBoxesArray = @{3390="NAND";3490="NAND";4020="NOR";4040="NOR";6820="NAND";6890="NAND";7590="NAND"};
 $Box_IP = '169.254.172.1';
-$Flash_Type = '';
+$BoxMemory = $NULL;
 
-# Ist der Fritz!Box-Typ Ã¼bergeben worden?
-if (-not $BoxType)
+
+# Ist die angegebene Box im Array enthalten? Wenn nein, dann Skript-Abbruch!
+if ( -not $SupportedBoxesArray.ContainsKey($BoxType) )
     {
-    Write-Error -Message "Fritz!Box-Typ nicht angegeben, ggf. Hilfe/Readme lesen!" -Category NotSpecified;
-    Exit 1;
-    }
+        Write-Error -Message "Der angegebene Fritz!Box-Typ wird derzeit nicht unterstützt" -Category InvalidData -ErrorAction Stop;
+        }
 
-# ist die Variable BoxType in den Arrays zu finden?
-if (-not ($NAND_Box -match $BoxType) -and -not ($NOR_Box -match $BoxType))
+Write-Verbose -message "ERFOLG: Die angegebene FRITZ!Box $BoxType wird unterstützt.";
+
+
+# Ist die Image-Datei angegeben worden und gibt es sie tatsächlich?
+if (-not $(Get-ChildItem $ImageFile).exists)
     {
-    Write-Error -Message "Der angegebene Fritz!Box-Typ wird derzeit nicht unterstÃ¼tzt" -Category InvalidData;
-    exit 1;
+    Write-Error -Message "Dateiname $ImageFile nicht gefunden!" -Category ObjectNotFound -ErrorAction Stop;
     }
+    
+Write-Verbose -message "ERFOLG: Die Image-Datei wurde korrekt angeben und ist vorhanden.";
+Write-Verbose -message "";
 
-# Ist die Image-Datei angegeben worden und gibt es sie tatsÃ¤chlich?
-if (-not (Test-Path $ImageFile))
-    {
-    Write-Error -Message "Dateiname $ImageFile nicht gefunden!" -Category ObjectNotFound;
-    Exit 1;
-    }
 
-# Ãœbergebene Image-Datei in einen absoluten Pfad umwandeln
-$ImageFile = Resolve-Path $ImageFile;
+#########################################################
+#
+# Image-Datei für's flashen vorbereiten
+#
+
+# Toolbox für die Image-Dateien von PeterPawn aufrufen
+.\FirmwareImage.ps1
+
+
+# Image-Dateien festlegen
+$NORBootImageFile = "$pwd\Images\$((Get-ChildItem $ImageFile).BaseName).NOR_bootable.image";
+$NANDBootImageFile = "$pwd\Images\$((Get-ChildItem $ImageFile).BaseName).NAND_bootable.image";
+
+Write-Verbose "Variable NORBootImageFile: $NORBootImageFile";
+Write-Verbose "Variable NANDBootImageFile: $NANDBootImageFile";
+
 
 #########################################################
 #
 # Skript-Aufruf von .\EVA-Discover.ps1
 #
 
-Write-Output "Bitte die FRITZ!Box nun an den Strom anschliessen...";
+Write-Output "Bitte die FRITZ!Box nun an den Strom anschließen...";
 
-if (-not (.\EVA-Discover.ps1 -maxWait 60 $Box_IP -Debug -Verbose))
+if (-not (.\EVA-Discover.ps1 -maxWait 120 $Box_IP -Verbose))
     {
-    Write-Error -Message "Keine FRITZ!Box gefunden!" -Category DeviceError;
-    Exit 1;
+    Write-Error -Message "Keine FRITZ!Box gefunden!" -Category DeviceError -ErrorAction Stop
     }
 
+Write-Verbose -message "ERFOLG: die FRITZ!Box $BoxType wurde im Bootloader angehalten.";
 
-#########################################################
+
+########################################################
 #
-# Skript-Aufruf von .\EVA-FTP-Client.ps1
-# fÃ¼r NAND-Boxen:
+# Skript-Aufruf von .\EVA-FTP-Client.ps1, je nach Speicherart
+# und Flash-Vorgang
+#
 
-if ($NAND_Box -match $BoxType)
+switch ($SupportedBoxesArray[$BoxType]) 
     {
-    if (-not (.\EVA-FTP-Client.ps1 $Box_IP -ScriptBlock { BootDeviceFromImage $ImageFile } -Debug -Verbose))
-        {
-        Write-Error -Message "Es ist ein Fehler beim flashen der NAND-Box $BoxType aufgetreten!" -Category InvalidOperation;
-        Exit 1;
-        }
+        "NOR" { Write-Verbose -message "Starte Flash-Vorgang für NOR-Boxen...";
+                Write-Verbose -message "";
+
+                if ($(Get-ChildItem $NORBootImageFile).Exists) { Remove-Item $NORBootImageFile; }
+
+                [FirmwareImage]::new($ImageFile).extractMemberAndRemoveChecksum("./var/tmp/kernel.image", $NORBootImageFile);
+
+                if (-not (.\EVA-FTP-Client.ps1 $Box_IP -ScriptBlock { UploadFlashFile $NORBootImageFile mtd1 } -Verbose))
+                    {
+                    Write-Error -Message "Es ist ein Fehler beim upload der Image-Datei aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
+                    }
+
+                if (-not (.\EVA-FTP-Client.ps1 $Box_IP -ScriptBlock { RebootTheDevice } -Verbose))
+                    {
+                    Write-Error -Message "Es ist ein Fehler beim Reboot-Command aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
+                    }
+                break;
+              }
+
+        "NAND" { Write-Verbose -message "Starte Flash-Vorgang für NAND-Boxen...";
+                 Write-Verbose -message "";
+                  
+                 if ( $(Get-ChildItem $NANDBootImageFile).Exists ) { Remove-Item $NANDBootImageFile; }
+
+                 [FirmwareImage]::new($ImageFile).getBootableImage($NANDBootImageFile);
+                 if (-not (.\EVA-FTP-Client.ps1 $Box_IP -ScriptBlock { SwitchSystem } -Verbose))
+                    {
+                    Write-Error -Message "Es ist ein Fehler beim ändern der aktiven Partition aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
+                    }
+ 
+                 if (-not (.\EVA-FTP-Client.ps1 $Box_IP -ScriptBlock { BootDeviceFromImage $NANDBootImageFile 0 } -Verbose))
+                    {
+                    Write-Error -Message "Es ist ein Fehler beim Upload der Image-Datei aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
+                    }
+                 break;
+                }
     }
 
-# fÃ¼r NOR-Boxen:
-
-if ($NOR_Box -match $BoxType)
-    {
-    if (-not (.\EVA-FTP-Client.ps1 $Box_IP -ScriptBlock { UploadFlashFile $ImageFile mtd1 } -Debug -Verbose))
-        {
-        Write-Error -Message "Es ist ein Fehler beim flashen der NOR-Box $BoxType aufgetreten!" -Category InvalidOperation;
-        exit 1;
-        }
-    .\EVA-FTP-Client.ps1 $Box_IP -ScriptBlock { RebootTheDevice } -Debug -Verbose;
-    }
 
 # Skript beenden
 Exit 0;
