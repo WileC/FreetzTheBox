@@ -37,7 +37,7 @@ Param([Parameter(Mandatory = $True, HelpMessage = 'Fritz!Box-Type e.g. 3490')][i
 
 ## Variablen-Definitonen
 $SupportedBoxesArray = @{3390="NAND";3490="NAND";4020="NOR";4040="NOR";6820="NAND";6890="NAND";7590="NAND"};
-$Box_IP = '169.254.172.1';
+$Box_IP = '169.254.1.1';
 $BoxMemory = $NULL;
 
 
@@ -51,7 +51,7 @@ Write-Verbose -message "ERFOLG: Die angegebene FRITZ!Box $BoxType wird unterstüt
 
 
 # Ist die Image-Datei angegeben worden und gibt es sie tatsächlich?
-if (-not $(Get-ChildItem $ImageFile).exists)
+if (-not $(Test-Path $ImageFile))
     {
     Write-Error -Message "Dateiname $ImageFile nicht gefunden!" -Category ObjectNotFound -ErrorAction Stop;
     }
@@ -66,15 +66,15 @@ Write-Verbose -message "";
 #
 
 # Toolbox für die Image-Dateien von PeterPawn aufrufen
-.\FirmwareImage.ps1
+. $pwd\FirmwareImage.ps1
 
 
 # Image-Dateien festlegen
-$NORBootImageFile = "$pwd\Images\$((Get-ChildItem $ImageFile).BaseName).NOR_bootable.image";
-$NANDBootImageFile = "$pwd\Images\$((Get-ChildItem $ImageFile).BaseName).NAND_bootable.image";
+$NORBootImageFile = "$pwd\Images\$((Get-Item $ImageFile).BaseName).NOR_bootable.image";
+$NANDBootImageFile = "$pwd\Images\$((Get-Item $ImageFile).BaseName).NAND_bootable.image";
 
-Write-Verbose "Variable NORBootImageFile: $NORBootImageFile";
-Write-Verbose "Variable NANDBootImageFile: $NANDBootImageFile";
+Write-Verbose -message "Variable NORBootImageFile: $NORBootImageFile";
+Write-Verbose -message "Variable NANDBootImageFile: $NANDBootImageFile";
 
 
 #########################################################
@@ -84,7 +84,7 @@ Write-Verbose "Variable NANDBootImageFile: $NANDBootImageFile";
 
 Write-Output "Bitte die FRITZ!Box nun an den Strom anschließen...";
 
-if (-not (.\EVA-Discover.ps1 -maxWait 120 $Box_IP -Verbose))
+if (-not $(.\EVA-Discover.ps1 -maxWait 120 $Box_IP -Verbose -Debug))
     {
     Write-Error -Message "Keine FRITZ!Box gefunden!" -Category DeviceError -ErrorAction Stop
     }
@@ -103,16 +103,16 @@ switch ($SupportedBoxesArray[$BoxType])
         "NOR" { Write-Verbose -message "Starte Flash-Vorgang für NOR-Boxen...";
                 Write-Verbose -message "";
 
-                if ($(Get-ChildItem $NORBootImageFile).Exists) { Remove-Item $NORBootImageFile; }
-
+                if ( $(Test-Path $NORBootImageFile) ) { Remove-Item $NORBootImageFile -Verbose; }
+               
                 [FirmwareImage]::new($ImageFile).extractMemberAndRemoveChecksum("./var/tmp/kernel.image", $NORBootImageFile);
-
-                if (-not (.\EVA-FTP-Client.ps1 $Box_IP -ScriptBlock { UploadFlashFile $NORBootImageFile mtd1 } -Verbose))
+             
+                if (-not (.\EVA-FTP-Client.ps1 -Address $Box_IP -ScriptBlock { UploadFlashFile $NORBootImageFile mtd1 } -Verbose -Debug))
                     {
                     Write-Error -Message "Es ist ein Fehler beim upload der Image-Datei aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
                     }
 
-                if (-not (.\EVA-FTP-Client.ps1 $Box_IP -ScriptBlock { RebootTheDevice } -Verbose))
+                if (-not (.\EVA-FTP-Client.ps1 -Address $Box_IP -ScriptBlock { RebootTheDevice } -Verbose -Debug))
                     {
                     Write-Error -Message "Es ist ein Fehler beim Reboot-Command aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
                     }
@@ -122,15 +122,16 @@ switch ($SupportedBoxesArray[$BoxType])
         "NAND" { Write-Verbose -message "Starte Flash-Vorgang für NAND-Boxen...";
                  Write-Verbose -message "";
                   
-                 if ( $(Get-ChildItem $NANDBootImageFile).Exists ) { Remove-Item $NANDBootImageFile; }
+                 if ( $(Test-Path $NANDBootImageFile) ) { Remove-Item $NANDBootImageFile -Verbose; }
 
                  [FirmwareImage]::new($ImageFile).getBootableImage($NANDBootImageFile);
-                 if (-not (.\EVA-FTP-Client.ps1 $Box_IP -ScriptBlock { SwitchSystem } -Verbose))
+                 
+                 if (-not (.\EVA-FTP-Client.ps1 -Address $Box_IP -ScriptBlock { SwitchSystem } -Verbose -Debug))
                     {
                     Write-Error -Message "Es ist ein Fehler beim ändern der aktiven Partition aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
                     }
  
-                 if (-not (.\EVA-FTP-Client.ps1 $Box_IP -ScriptBlock { BootDeviceFromImage $NANDBootImageFile 0 } -Verbose))
+                 if (-not (.\EVA-FTP-Client.ps1 -Address $Box_IP -ScriptBlock { BootDeviceFromImage $NANDBootImageFile 0 } -Verbose -Debug))
                     {
                     Write-Error -Message "Es ist ein Fehler beim Upload der Image-Datei aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
                     }
