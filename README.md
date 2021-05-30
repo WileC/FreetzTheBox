@@ -3,7 +3,7 @@ Einfaches flashen der FritzBox mit den Windows-Powershell-Skripten der YourFritz
 
   - install.cmd herunterladen
   - PowerShell starten
-  - ./FreetzTheBox/FreetzTheBox.ps1 -BoxType <Boxnummer> -ImageFile <Pfad zur .image>
+  - ./FreetzTheBox/FreetzTheBox.ps1 -BoxType <Boxnummer> -ImageFile <Pfad zur .image> [-isbootableImage]
   - Anweisungen auf dem Bildschirm folgen
 
 Weitere Infos:
