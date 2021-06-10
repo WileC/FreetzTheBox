@@ -24,13 +24,16 @@
     Filename: FreetzTheBox.ps1
 
 .EXAMPLE
-    .\FreetzTheBox.ps1 -BoxType 3490 -ImageFile .\example.image [-isbootableImage]
+    .\FreetzTheBox.ps1 -BoxType 3490 -ImageFile .\example.image [-BoxIP 192.168.178.1] [-isbootableImage]
 
-.PARAMTER BoxType
+.PARAMETER BoxType
     Der Name der Fritz!Box
 
-.PARAMTER ImageFile
+.PARAMETER ImageFile
     Die Image-Datei, welche in den Bootloader der FRITZ!Box geschrieben werden soll. Vgl. hierzu "EXAMPLE"
+	
+.PARAMETER BoxIP
+	Steuert das ansprechen der FRITZ!Box während des Startvorgangs entweder über die vordefinierte IP oder über eine eigene, festgelegte.
     
 .PARAMETER isbootableImage
     Der Schalter funktioniert nur bei NAND-Boxen. Wird der Schalter gesetzt, wird das übergebene Image als 
@@ -81,7 +84,7 @@ Write-Verbose -message "ERFOLG: Die Image-Datei wurde korrekt angeben und ist vo
 Write-Verbose -Message "INFO: Überprüfung, ob Neztwerkkabel am LAN-Interface angeschlossen ist oder DhcpMediaSense deaktiviert wurde..";
 if ( $(Get-NetIPInterface -AddressFamily IPv4 -InterfaceAlias Ethernet).ConnectionState )
     {
-    Write-Verbose -Message "INFO: Die FRITZ!Box $BoxType wird mit der IP-Adresse $BoxIP angesprochen... `n"
+    Write-Host "INFO: Die FRITZ!Box $BoxType wird mit der IP-Adresse $BoxIP angesprochen... `n"
     }
     else
         {
@@ -89,6 +92,18 @@ if ( $(Get-NetIPInterface -AddressFamily IPv4 -InterfaceAlias Ethernet).Connecti
         Dies kann zu Problemen beim flashen der Firmware oder beim ansprechen der Box im Bootloader führen. `
         Weitere Informationen unter https://www.github.com/wilec/..." -Category ConnectionError -ErrorAction Stop;
         }
+
+## Überprüfung, ob die Windows-Firewall aktiv ist...
+Write-Verbose -Message "INFO: Überprüfung, ob die Windows-Firewall aktiv ist..."
+if ( $(Get-NetFirewallProfile -Name Domain,Private,Public -ErrorAction Ignore).Enabled )
+	{
+	Write-Error -Message "Die Windows-Firewall (Windows-Defender) ist aktiv. Dies kann zu Problemen beim Verbindungsaufbau während `
+	des flashens der FRITZ!Box $BoxType kommen. Daher ist es sinnvoll, während des flashens, die Firewall/Defender zu deaktivieren!" -Category ConnectionError -ErrorAction Continue;
+	}
+	else
+	{
+		Write-Verbose -Message "INFO: Die Windows-Firewall ist deaktiviert, es sollte zu keinen Verbindungsproblemen kommen...";
+    }
 
 
 ########################################
@@ -148,23 +163,30 @@ switch ($SupportedBoxesArray[$BoxType])
               }
 
         "NAND" { Write-Verbose -message "Starte Flash-Vorgang für NAND-Boxen...";
-
-                 $NANDBootImageFile = "$pwd\Images\$((Get-Item $ImageFile).BaseName).NAND_bootable.image";
-                 Write-Verbose -message "Variable NANDBootImageFile: $NANDBootImageFile";
-                  
-                 if ( $(Test-Path $NANDBootImageFile) ) { Remove-Item $NANDBootImageFile -Verbose; }
-
-                 if ( -not $isbootableImage) { [FirmwareImage]::new($ImageFile).getBootableImage($NANDBootImageFile) };
-                 
-                 sleep -Seconds 2;
+		
+                 if ( -not $isbootableImage) {
+					$NANDBootImageFile = "$pwd\Images\$((Get-Item $ImageFile).BaseName).NAND_bootable.image";
+					if ( $(Test-Path $NANDBootImageFile) ) { 
+						Remove-Item $NANDBootImageFile -Verbose;
+					}
+					[FirmwareImage]::new($ImageFile).getBootableImage($NANDBootImageFile);
+				 }
+				 else {
+					$NANDBootImageFile = $ImageFile;
+				 }
+				 
+				 Write-Verbose -message "Variable NANDBootImageFile: $NANDBootImageFile";
+				 sleep -Seconds 2;
                  Write-Verbose -Message "INFO: Wechsle Firmware-Partition der FRITZ!Box $BoxType...";
-                 if (-not (.\EVA-FTP-Client.ps1 -Address $BoxIP -ScriptBlock { SwitchSystem } -Verbose -Debug))
+                 
+				 if (-not (.\EVA-FTP-Client.ps1 -Address $BoxIP -ScriptBlock { SwitchSystem } -Verbose -Debug))
                     {
                     Write-Error -Message "Es ist ein Fehler beim ändern der aktiven Partition aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
                     }
 
                  sleep -Seconds 2;
                  Write-Verbose -Message "INFO: flashe Firmware...";
+				 
                  if (-not (.\EVA-FTP-Client.ps1 -Address $BoxIP -ScriptBlock { BootDeviceFromImage $NANDBootImageFile } -Verbose -Debug))
                     {
                     Write-Error -Message "Es ist ein Fehler beim Upload der Image-Datei aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
