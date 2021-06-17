@@ -82,16 +82,18 @@ Write-Verbose -message "ERFOLG: Die Image-Datei wurde korrekt angeben und ist vo
 
 ## Überprüfung, ob Neztwerkkabel am LAN-Interface angeschlossen ist oder DhcpMediaSense deaktiviert wurde
 Write-Verbose -Message "INFO: Überprüfung, ob Neztwerkkabel am LAN-Interface angeschlossen ist oder DhcpMediaSense deaktiviert wurde..";
-if ( $(Get-NetIPInterface -AddressFamily IPv4 -InterfaceAlias Ethernet).ConnectionState )
+if ( $(Get-NetIPv4Protocol).DhcpMediaSense )
     {
-    Write-Host "INFO: Die FRITZ!Box $BoxType wird mit der IP-Adresse $BoxIP angesprochen... `n"
+    Write-Error -Message "INFO: Der DHCPMediaSense ist auf den Netzwerkschittstellen aktiv. Dies kann je nach Verbindung zur FRITZ!Box zu Problemen führen. `
+    `Sollte ein LAN-Kabel verwendet werden, sollte entweder eine APIPA-Adresse bereits vergeben sein, bevor der Flash-Vorgang gestartet wird oder eine feste `
+    `IP-Adresse vergeben worden sein. Alternativ kann auch ein Switch zwischen PC und FRITZ!Box verbunden werden. Für weitere Informationen bitte die readme.md `
+    `lesen (https://github.com/WileC/FreetzTheBox/blob/master/README.md)" -Category ConnectionError -ErrorAction Continue;
     }
-    else
-        {
-        Write-Error -Message "Entweder ist das Netzwerkkabel nicht verbunden oder der DhcpMediaSense ist aktiv.`
-        Dies kann zu Problemen beim flashen der Firmware oder beim ansprechen der Box im Bootloader führen. `
-        Weitere Informationen unter https://www.github.com/wilec/..." -Category ConnectionError -ErrorAction Stop;
-        }
+
+if ( -not $(Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias Ether*,WLAN*).IPv4Address )
+    {
+    Write-Error -Message "FEHLER: Keiner Netzwerkschnittstelle wurde eine gültige IP-Adresse vergeben!" -Category ConnectionError -ErrorAction Stop;
+    }
 
 
 ########################################
@@ -114,7 +116,7 @@ if (-not $(.\EVA-Discover.ps1 -maxWait 120 -requested_address $BoxIP -Verbose -D
     }
 
 Write-Verbose -message "ERFOLG: die FRITZ!Box $BoxType wurde im Bootloader angehalten. `n";
-Read-Host -Prompt "Um fortzufahren ENTER drücken...";
+Read-Host -Prompt "Um fortzufahren [ENTER] drücken...";
 
 ########################################################
 ##
@@ -187,4 +189,5 @@ switch ($SupportedBoxesArray[$BoxType])
 
 
 # Skript beenden
+Read-Host -Prompt "Um das Skript zu beenden [ENTER] drücken...";
 Exit 0;
