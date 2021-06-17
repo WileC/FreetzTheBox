@@ -50,7 +50,7 @@
 
 Param([Parameter(Mandatory = $True, HelpMessage = 'Fritz!Box-Type e.g. 3490')][int]$BoxType,
       [Parameter(Mandatory = $True, HelpMessage = 'The imagefile to load in the bootloader')][string]$ImageFile,
-      [Parameter(Mandatory = $False, HelpMessage = 'The IP for searching the box while booting')][string]$BoxIP='169.254.1.1',
+      [Parameter(Mandatory = $False, HelpMessage = 'The IP for searching the box while booting')][string]$BoxIP='192.168.178.1',
       [Parameter(Mandatory = $False, HelpMessage = 'Is it an in-memory image?')][switch]$isbootableImage=$false
     )
 
@@ -92,18 +92,6 @@ if ( $(Get-NetIPInterface -AddressFamily IPv4 -InterfaceAlias Ethernet).Connecti
         Dies kann zu Problemen beim flashen der Firmware oder beim ansprechen der Box im Bootloader führen. `
         Weitere Informationen unter https://www.github.com/wilec/..." -Category ConnectionError -ErrorAction Stop;
         }
-
-## Überprüfung, ob die Windows-Firewall aktiv ist...
-Write-Verbose -Message "INFO: Überprüfung, ob die Windows-Firewall aktiv ist..."
-if ( $(Get-NetFirewallProfile -Name Domain,Private,Public -ErrorAction Ignore).Enabled )
-	{
-	Write-Error -Message "Die Windows-Firewall (Windows-Defender) ist aktiv. Dies kann zu Problemen beim Verbindungsaufbau während `
-	des flashens der FRITZ!Box $BoxType kommen. Daher ist es sinnvoll, während des flashens, die Firewall/Defender zu deaktivieren!" -Category ConnectionError -ErrorAction Continue;
-	}
-	else
-	{
-		Write-Verbose -Message "INFO: Die Windows-Firewall ist deaktiviert, es sollte zu keinen Verbindungsproblemen kommen...";
-    }
 
 
 ########################################
