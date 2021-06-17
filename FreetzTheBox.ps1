@@ -84,10 +84,10 @@ Write-Verbose -message "ERFOLG: Die Image-Datei wurde korrekt angeben und ist vo
 Write-Verbose -Message "INFO: Überprüfung, ob Neztwerkkabel am LAN-Interface angeschlossen ist oder DhcpMediaSense deaktiviert wurde..";
 if ( $(Get-NetIPv4Protocol).DhcpMediaSense )
     {
-    Write-Error -Message "INFO: Der DHCPMediaSense ist auf den Netzwerkschittstellen aktiv. Dies kann je nach Verbindung zur FRITZ!Box zu Problemen führen. `
+    Write-Verbose -Message "INFO: Der DHCPMediaSense ist auf den Netzwerkschittstellen aktiv. Dies kann je nach Verbindung zur FRITZ!Box zu Problemen führen. `
     `Sollte ein LAN-Kabel verwendet werden, sollte entweder eine APIPA-Adresse bereits vergeben sein, bevor der Flash-Vorgang gestartet wird oder eine feste `
     `IP-Adresse vergeben worden sein. Alternativ kann auch ein Switch zwischen PC und FRITZ!Box verbunden werden. Für weitere Informationen bitte die readme.md `
-    `lesen (https://github.com/WileC/FreetzTheBox/blob/master/README.md)" -Category ConnectionError -ErrorAction Continue;
+    `lesen (https://github.com/WileC/FreetzTheBox/blob/master/README.md) `n"
     }
 
 if ( -not $(Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias Ether*,WLAN*).IPv4Address )
