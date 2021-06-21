@@ -78,6 +78,7 @@ if (-not $(Test-Path $ImageFile))
     }
     
 Write-Verbose -message "ERFOLG: Die Image-Datei wurde korrekt angeben und ist vorhanden. `n";
+$ImageFile = resolve-path $ImageFile;
 
 
 ## Überprüfung, ob Neztwerkkabel am LAN-Interface angeschlossen ist oder DhcpMediaSense deaktiviert wurde
@@ -137,7 +138,13 @@ switch ($SupportedBoxesArray[$BoxType])
              
                 sleep -Seconds 2;
                 Write-Verbose -Message "INFO: flashe Firmware ...";
-                if (-not (.\EVA-FTP-Client.ps1 -ScriptBlock { UploadFlashFile $NORBootImageFile mtd1 } -Verbose -Debug))
+
+                .\EVA-FTP-Client.ps1 -Address $BoxIP -ScriptBlock { UploadFlashFile $NORBootImageFile mtd1 } -Verbose -Debug;
+                sleep -Seconds 2;
+                .\EVA-FTP-Client.ps1 -Address $BoxIP -ScriptBlock { RebootTheDevice } -Verbose -Debug;
+
+                <#
+                if (-not (.\EVA-FTP-Client.ps1 -Address $BoxIP -ScriptBlock { UploadFlashFile $NORBootImageFile mtd1 } -Verbose -Debug))
                     {
                     Write-Error -Message "Es ist ein Fehler beim upload der Image-Datei aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
                     }
@@ -149,6 +156,8 @@ switch ($SupportedBoxesArray[$BoxType])
                     Write-Error -Message "Es ist ein Fehler beim Reboot-Command aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
                     }
                 Write-Output "Flashvorgang der FRITZ!Box $BoxType erfolgreich abgelossen `n";
+                #>
+
                 break;
               }
 
@@ -168,7 +177,12 @@ switch ($SupportedBoxesArray[$BoxType])
 				 Write-Verbose -message "Variable NANDBootImageFile: $NANDBootImageFile";
 				 sleep -Seconds 2;
                  Write-Verbose -Message "INFO: Wechsle Firmware-Partition der FRITZ!Box $BoxType...";
-                 
+
+                 .\EVA-FTP-Client.ps1 -Address $BoxIP -ScriptBlock { SwitchSystem } -Verbose -Debug;
+                 sleep -Seconds 2;
+                 .\EVA-FTP-Client.ps1 -Address $BoxIP -ScriptBlock { BootDeviceFromImage $NANDBootImageFile } -Verbose -Debug;
+
+                 <#
 				 if (-not (.\EVA-FTP-Client.ps1 -Address $BoxIP -ScriptBlock { SwitchSystem } -Verbose -Debug))
                     {
                     Write-Error -Message "Es ist ein Fehler beim ändern der aktiven Partition aufgetreten!" -Category InvalidOperation -ErrorAction Stop;
@@ -183,6 +197,8 @@ switch ($SupportedBoxesArray[$BoxType])
                     }
 
                  Write-Output "Flashvorgang der FRITZ!Box $BoxType erfolgreich abgelossen `n";
+                 #>
+
                  break;
                 }
     }
