@@ -6,7 +6,7 @@ REM     DL-Source:              https://github.com/WileC/FreetzTheBox
 REM     Web:                    http://www.djwilec.de
 REM     Infos:                  getestet mit Windows 10; automatisierte Installation zur einfachen (Erst-)Installation von Freetz auf den
 REM                             FritzBoxen von AVM
-REM     UnterstÃ¼tzte Boxen:     3390, 3490, 4020, 4040, 6820, 6890, 7590
+REM     Unterstützte Boxen:     3390, 3490, 4020, 4040, 6820, 6890, 7590
 
 REM Verzeichnisse anlegen
 mkdir FreetzTheBox
@@ -28,7 +28,7 @@ powershell -command {Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Cu
 
 echo.
 echo.
-echo "Zur Deinstallation die UNINSTALL.CMD ausfÃ¼hren."
+echo "Zur Deinstallation die UNINSTALL.CMD ausführen."
 echo.
 
 pause
