@@ -13,15 +13,15 @@ mkdir FreetzTheBox
 mkdir FreetzTheBox\Images
 
 REM PowerShell-Skripte von PeterPawns GitHub herunterladen
-curl --insecure --location --output FreetzTheBox/EVA-Discover.ps1 "https://github.com/PeterPawn/YourFritz/raw/master/eva_tools/EVA-Discover.ps1"
-curl --insecure --location --output FreetzTheBox/EVA-FTP-Client.ps1 "https://github.com/PeterPawn/YourFritz/raw/master/eva_tools/EVA-FTP-Client.ps1"
-curl --insecure --location --output FreetzTheBox/FirmwareImage.ps1 "https://github.com/PeterPawn/YourFritz/raw/master/signimage/FirmwareImage.ps1"
+curl --insecure --location --output FreetzTheBox/EVA-Discover.ps1 "https://raw.githubusercontent.com/PeterPawn/YourFritz/main/eva_tools/EVA-Discover.ps1"
+curl --insecure --location --output FreetzTheBox/EVA-FTP-Client.ps1 "https://raw.githubusercontent.com/PeterPawn/YourFritz/main/eva_tools/EVA-FTP-Client.ps1"
+curl --insecure --location --output FreetzTheBox/FirmwareImage.ps1 "https://raw.githubusercontent.com/PeterPawn/YourFritz/main/signimage/FirmwareImage.ps1"
 
 REM Wrapper-Skript von WileC herunterladen
-curl --insecure --location --output FreetzTheBox/FreetzTheBox.ps1 "https://github.com/WileC/FreetzTheBox/raw/master/FreetzTheBox.ps1"
+curl --insecure --location --output FreetzTheBox/FreetzTheBox.ps1 "https://raw.githubusercontent.com/WileC/FreetzTheBox/master/install_FreetzTheBox.cmd"
 
 REM Uninstall-Skript von WileC herunterladen
-curl --insecure --location --output uninstall.cmd "https://github.com/WileC/FreetzTheBox/raw/master/uninstall_FreetzTheBox.cmd"
+curl --insecure --location --output uninstall.cmd "https://raw.githubusercontent.com/WileC/FreetzTheBox/master/uninstall_FreetzTheBox.cmd"
 
 REM PowerShell-Skripte erlauben
 powershell -command {Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser -Force}
