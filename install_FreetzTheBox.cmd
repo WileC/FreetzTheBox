@@ -18,7 +18,7 @@ curl --insecure --location --output FreetzTheBox/EVA-FTP-Client.ps1 "https://raw
 curl --insecure --location --output FreetzTheBox/FirmwareImage.ps1 "https://raw.githubusercontent.com/PeterPawn/YourFritz/main/signimage/FirmwareImage.ps1"
 
 REM Wrapper-Skript von WileC herunterladen
-curl --insecure --location --output FreetzTheBox/FreetzTheBox.ps1 "https://raw.githubusercontent.com/WileC/FreetzTheBox/master/install_FreetzTheBox.cmd"
+curl --insecure --location --output FreetzTheBox/FreetzTheBox.ps1 "https://raw.githubusercontent.com/WileC/FreetzTheBox/master/FreetzTheBox.ps1"
 
 REM Uninstall-Skript von WileC herunterladen
 curl --insecure --location --output uninstall.cmd "https://raw.githubusercontent.com/WileC/FreetzTheBox/master/uninstall_FreetzTheBox.cmd"
